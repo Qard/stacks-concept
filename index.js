@@ -43,13 +43,11 @@ stack.run = function (name, fn) {
       return function () {
         var args = argsToArray(arguments)
         var ctx = this
-        var ret
 
-        stack.createChild(name + ' (callback)', id, function () {
-          ret = fn.apply(ctx, arguments)
-        }, close)
-
-        return ret
+        var s = new Stack(name + ' (callback)', id, close)
+        return s.run(function () {
+          return fn.apply(ctx, arguments)
+        })
       }
     })
   })
@@ -95,7 +93,8 @@ function Stack (name, parentId, close) {
 
 // Descending stacks should hold their parent open until resolution
 Stack.prototype.descend = function (name, fn) {
-  return stack.createChild(name, this.id, fn, this.holdOpen())
+  var s = new Stack(name, this.id, this.holdOpen())
+  return s.run(fn)
 }
 
 // Enter this stack
