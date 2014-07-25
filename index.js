@@ -25,17 +25,17 @@ module.exports = exports = stack
 var activeStacks = {}
 
 // Create a child stack and run a function in it
-stack.createChild = function (id, fn, close) {
-  var s = new Stack(id, close)
+stack.createChild = function (name, id, fn, close) {
+  var s = new Stack(name, id, close)
   return s.run(fn)
 }
 
 // Sugary simplification of manual createChild method
 // NOTE: This is a bit slower due to args conversion and fn.apply
-stack.run = function (fn) {
+stack.run = function (name, fn) {
   var async = fn.length === 1
 
-  return stack.active.descend(function () {
+  return stack.active.descend(name, function () {
     var close = async && stack.active.holdOpen()
     var id = stack.id
 
@@ -45,7 +45,7 @@ stack.run = function (fn) {
         var ctx = this
         var ret
 
-        stack.createChild(id, function () {
+        stack.createChild(name + ' (callback)', id, function () {
           ret = fn.apply(ctx, arguments)
         }, close)
 
@@ -56,8 +56,8 @@ stack.run = function (fn) {
 }
 
 // Apply hint data to the active stack
-stack.hint = function (name, meta) {
-  stack.emit('hint', stack.id, name, meta)
+stack.hint = function (meta) {
+  stack.emit('hint', stack.id, meta)
 }
 
 // Get the descriptor object for an active stack frame
@@ -83,7 +83,8 @@ stack.ancestorIds = function (id) {
 // Stack data object
 //
 stack.Stack = Stack
-function Stack (parentId, close) {
+function Stack (name, parentId, close) {
+  this.name = name || '(anonymous)'
   this.id = ids.reserve()
   this.parent = activeStacks[parentId]
   this.pendingCalls = 0
@@ -93,13 +94,13 @@ function Stack (parentId, close) {
 }
 
 // Descending stacks should hold their parent open until resolution
-Stack.prototype.descend = function (fn) {
-  return stack.createChild(this.id, fn, this.holdOpen())
+Stack.prototype.descend = function (name, fn) {
+  return stack.createChild(name, this.id, fn, this.holdOpen())
 }
 
 // Enter this stack
 Stack.prototype.enter = function () {
-  debug('entered stack', this.id)
+  debug('entered stack', this.id, this.name)
   activeStacks[this.id] = this
   stack.active = this
   stack.id = this.id
@@ -115,7 +116,7 @@ Stack.prototype.enter = function () {
 // Do cleanup when the stack is not longer in-use
 Stack.prototype.exit = function () {
   stack.emit('exit', this.id)
-  debug('exited sync stack', this.id)
+  debug('exited sync stack', this.id, this.name)
 
 
   // Return to outer stack, if available
@@ -131,8 +132,8 @@ Stack.prototype.exit = function () {
 
 // Store some handy meta data to describe
 // the activity of the current stack
-Stack.prototype.hint = function (name, meta) {
-  stack.emit('hint', this.id, name, meta)
+Stack.prototype.hint = function (meta) {
+  stack.emit('hint', this.id, meta)
 }
 
 // Helper to enter and exit the stack cleanly
@@ -161,12 +162,12 @@ Stack.prototype.release = function () {
   stack.emit('resolve', this.id)
   delete activeStacks[this.id]
   ids.release(this.id)
-  debug('exited async stack', this.id)
+  debug('exited async stack', this.id, this.name)
   if (this.close) this.close()
 }
 
 // Enter top-level stack
-var topStack = new Stack
+var topStack = new Stack('(main)')
 topStack.enter()
 
 // Exit the top-level stack after the first tick ends

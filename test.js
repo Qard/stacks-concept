@@ -7,7 +7,8 @@ var stack = require('./')
 //
 global.setTimeout = (function (setTimeout) {
   return function (fn, ms) {
-    return stack.run(function (wrap) {
+    return stack.run('timeout', function (wrap) {
+      stack.hint({ length: ms })
       return setTimeout(wrap(fn), ms)
     })
   }
@@ -41,11 +42,10 @@ stack.context.foo = 'bar'
 
 // Listen for stack hints
 // We can stitch these together to form layers
-stack.on('hint', function (id, name, meta) {
+stack.on('hint', function (id, meta) {
   var frame = stack.getActiveStackFrame(id)
-  frame.name = name
   frame.meta = meta
-  // debug('hinted', frame)
+  debug('hinted', frame)
 })
 
 var count = 10
@@ -70,7 +70,7 @@ var done = after(count * 2, function () {
 nums.forEach(function (i) {
   // Artificially create a stack for each number
   // This is to simulate simultaneous requests
-  stack.run(function () {
+  stack.run('request', function () {
     assert(stack.context.rand === undefined)
     var rand = Math.ceil(Math.random() * 10)
     stack.context.rand = rand
@@ -82,7 +82,6 @@ nums.forEach(function (i) {
       stack.context.i = i
 
       setTimeout(function () {
-        stack.hint('timeout', { length: rand })
         assert(stack.context.foo === 'bar')
         assert(stack.context.rand === rand)
         assert(stack.context.i === i)
@@ -93,7 +92,6 @@ nums.forEach(function (i) {
       }, rand * rand)
 
       setTimeout(function () {
-        stack.hint('timeout', { length: rand })
         assert(stack.context.foo === 'bar')
         assert(stack.context.rand === rand)
         assert(stack.context.i === i)
