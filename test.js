@@ -45,18 +45,32 @@ stack.on('hint', function (id, name, meta) {
   var frame = stack.getActiveStackFrame(id)
   frame.name = name
   frame.meta = meta
-  debug('hinted', frame)
+  // debug('hinted', frame)
 })
 
+var count = 10
 var nums = []
-for (var i = 0; i < 1; i++) {
+for (var i = 0; i < count; i++) {
   nums.push(i)
 }
+
+function after (n, fn) {
+  return function () {
+    n--
+    if (n === 0) fn()
+  }
+}
+
+var start = Date.now()
+var done = after(count * 2, function () {
+  debug('it took ' + (Date.now() - start) + ' ms')
+})
+
 // var nums = [1,2,3,4,5,6,7,8,9,10]
 nums.forEach(function (i) {
   // Artificially create a stack for each number
   // This is to simulate simultaneous requests
-  stack.createChild(id, function () {
+  stack.run(function () {
     assert(stack.context.rand === undefined)
     var rand = Math.ceil(Math.random() * 10)
     stack.context.rand = rand
@@ -75,6 +89,7 @@ nums.forEach(function (i) {
 
         // List ancestor ids, in inheritance order
         debug('doubled', i, stack.ancestorIds(stack.id))
+        done()
       }, rand * rand)
 
       setTimeout(function () {
@@ -85,6 +100,7 @@ nums.forEach(function (i) {
 
         // List ancestor ids, in inheritance order
         debug('halved', i, stack.ancestorIds(stack.id))
+        done()
       }, rand / rand)
     }, rand)
   })

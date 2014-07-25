@@ -31,23 +31,27 @@ stack.createChild = function (id, fn, close) {
 }
 
 // Sugary simplification of manual createChild method
+// NOTE: This is a bit slower due to args conversion and fn.apply
 stack.run = function (fn) {
   var async = fn.length === 1
-  var close = async && stack.active.holdOpen()
-  var id = stack.id
 
-  fn(function (fn) {
-    return function () {
-      var args = argsToArray(arguments)
-      var ctx = this
-      var ret
+  return stack.active.descend(function () {
+    var close = async && stack.active.holdOpen()
+    var id = stack.id
 
-      stack.createChild(id, function () {
-        ret = fn.apply(ctx, arguments)
-      }, close)
+    return fn(function (fn) {
+      return function () {
+        var args = argsToArray(arguments)
+        var ctx = this
+        var ret
 
-      return ret
-    }
+        stack.createChild(id, function () {
+          ret = fn.apply(ctx, arguments)
+        }, close)
+
+        return ret
+      }
+    })
   })
 }
 
@@ -88,6 +92,11 @@ function Stack (parentId, close) {
   debug('constructed stack', this.id)
 }
 
+// Descending stacks should hold their parent open until resolution
+Stack.prototype.descend = function (fn) {
+  return stack.createChild(this.id, fn, this.holdOpen())
+}
+
 // Enter this stack
 Stack.prototype.enter = function () {
   debug('entered stack', this.id)
@@ -100,9 +109,6 @@ Stack.prototype.enter = function () {
   // Notify stack tracker of the id change
   if (this.parent) {
     stack.emit('change', this.id, this.parent.id)
-
-    // // Hold parent open while this stack remains open
-    // this.parent.pendingCalls++
   }
 }
 
@@ -163,7 +169,7 @@ Stack.prototype.release = function () {
 var topStack = new Stack
 topStack.enter()
 
-// Exit the top-level stack at process exit
-process.on('exit', function () {
-  topStack.release()
+// Exit the top-level stack after the first tick ends
+process.nextTick(function () {
+  topStack.exit()
 })
