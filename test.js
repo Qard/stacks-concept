@@ -2,17 +2,7 @@ var debug = require('debug')('stack:test')
 var assert = require('assert')
 var stack = require('./')
 
-//
-// Hack setTimeout to use the async stack interface
-//
-global.setTimeout = (function (setTimeout) {
-  return function (fn, ms) {
-    return stack.run('timeout', function (wrap) {
-      stack.hint({ length: ms })
-      return setTimeout(wrap(fn), ms)
-    })
-  }
-})(global.setTimeout)
+require('./patches/_timers')
 
 //
 // Implement continuation-local-storage equivalent
@@ -44,11 +34,10 @@ stack.context.foo = 'bar'
 // We can stitch these together to form layers
 stack.on('hint', function (id, meta) {
   var frame = stack.getActiveStackFrame(id)
-  frame.meta = meta
-  debug('hinted', frame)
+  debug('hinted', meta, id, frame.name)
 })
 
-var count = 10
+var count = 4
 var nums = []
 for (var i = 0; i < count; i++) {
   nums.push(i)
@@ -77,7 +66,7 @@ nums.forEach(function (i) {
 
     // Start a random-length timeout so tests run in non-deterministic order
     // This verifies the stack continuation and context switching works
-    setTimeout(function () {
+    setImmediate(function () {
       assert(stack.context.i === undefined)
       stack.context.i = i
 
@@ -100,6 +89,6 @@ nums.forEach(function (i) {
         debug('halved', i, stack.ancestorIds(stack.id))
         done()
       }, rand / rand)
-    }, rand)
+    })
   })
 })

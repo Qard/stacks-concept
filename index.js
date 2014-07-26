@@ -88,7 +88,7 @@ function Stack (name, parentId, close) {
   this.pendingCalls = 0
   this.close = close
 
-  debug('constructed stack', this.id)
+  debug('new', this.id, this.name)
 }
 
 // Descending stacks should hold their parent open until resolution
@@ -99,7 +99,7 @@ Stack.prototype.descend = function (name, fn) {
 
 // Enter this stack
 Stack.prototype.enter = function () {
-  debug('entered stack', this.id, this.name)
+  debug('enter', this.id, this.name)
   activeStacks[this.id] = this
   stack.active = this
   stack.id = this.id
@@ -115,7 +115,7 @@ Stack.prototype.enter = function () {
 // Do cleanup when the stack is not longer in-use
 Stack.prototype.exit = function () {
   stack.emit('exit', this.id)
-  debug('exited sync stack', this.id, this.name)
+  debug('exit', this.id, this.name)
 
 
   // Return to outer stack, if available
@@ -161,7 +161,7 @@ Stack.prototype.release = function () {
   stack.emit('resolve', this.id)
   delete activeStacks[this.id]
   ids.release(this.id)
-  debug('exited async stack', this.id, this.name)
+  debug('resolve', this.id, this.name)
   if (this.close) this.close()
 }
 
