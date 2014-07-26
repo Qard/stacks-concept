@@ -78,7 +78,7 @@ nums.forEach(function (i) {
         // List ancestor ids, in inheritance order
         debug('doubled', i, stack.ancestorIds(stack.id))
         done()
-      }, rand * rand)
+      }, rand * 2)
 
       setTimeout(function () {
         assert(stack.context.foo === 'bar')
@@ -88,7 +88,7 @@ nums.forEach(function (i) {
         // List ancestor ids, in inheritance order
         debug('halved', i, stack.ancestorIds(stack.id))
         done()
-      }, rand / rand)
+      }, rand / 2)
     })
   })
 })
