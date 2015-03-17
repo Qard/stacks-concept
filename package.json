@@ -2,10 +2,9 @@
   "name": "stack-test",
   "version": "0.0.0",
   "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "DEBUG=* node test.js"
-  },
+  "main": "node.js",
+  "browser": "./browser.js",
+  "scripts": {},
   "author": "",
   "license": "ISC",
   "dependencies": {

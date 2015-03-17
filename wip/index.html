@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test</title>
+  </head>
+  <body>
+    <script type="text/javascript" src="/bundle.js"></script>
+    <script type="text/javascript">
+      var items = [1,2]
+
+      items.forEach(function (v) {
+        requestAnimationFrame(function () {
+          setTimeout(function () {
+            console.log('a')
+          }, v * 1000)
+        })
+      })
+
+      requestAnimationFrame(function () {
+        setTimeout(function () {
+          items.forEach(console.log.bind(console, 'forEach inner'))
+          items.forEach(console.log.bind(console, 'forEach inner'))
+          console.log(Stack.ancestorIds(Stack.active.id))
+          console.log('b')
+        }, 1000)
+      })
+    </script>
+  </body>
+</html>
