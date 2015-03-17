@@ -1,0 +1,20 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "browserify index.js -o bundle.js",
+    "start": "serve"
+  },
+  "author": "Stephen Belanger <admin@stephenbelanger.com>",
+  "license": "MIT",
+  "dependencies": {
+    "id-pool": "~0.1.0",
+    "sliced": "0.0.5"
+  },
+  "devDependencies": {
+    "browserify": "~9.0.3",
+    "serve": "~1.4.0"
+  }
+}
