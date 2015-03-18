@@ -10,14 +10,7 @@ var ids = new IdPool
 // NOTE: This is mostly used for holding open async stacks
 Stack.stacks = {}
 
-// Create a child stack and run a function in it
-Stack.createChild = function (id, fn, close) {
-  var s = new Stack(id, close)
-  return s.run(fn)
-}
-
-// Sugary simplification of manual createChild method
-// NOTE: This is a bit slower due to args conversion and fn.apply
+// Sugary simplification of descending from active stack
 Stack.run = function (fn) {
   return Stack.active.descend(fn)
 }
@@ -97,7 +90,7 @@ Stack.prototype.exit = function () {
 
 // Helper to enter and exit the stack cleanly
 Stack.prototype.run = function (fn) {
-  var async = this.async = fn.length == 1
+  var async = this.async = fn.length === 1
   var self = this
 
   function runner (fn) {
@@ -109,7 +102,7 @@ Stack.prototype.run = function (fn) {
     }
   }
 
-  return async ? fn(runner) : runner(fn).call(this)
+  return async ? fn(runner) : runner(fn)()
 }
 
 // Used to hold a stack open for some async action
