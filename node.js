@@ -4,12 +4,14 @@ var Stack = module.exports = require('./stack')
 //
 // Track top-level stack
 //
-var topStack = Stack.top = new Stack('(main)')
-topStack.enter()
+Stack.init = function () {
+  var topStack = Stack.top = new Stack('(main)')
+  topStack.enter()
 
-process.on('exit', function () {
-  topStack.exit()
-})
+  process.on('exit', function () {
+    topStack.exit()
+  })
+}
 
 //
 // Safely shim functions that may or may not exist
@@ -34,10 +36,12 @@ function wrapCallbackFirst (real, name) {
     var args = argsToArray(arguments)
     var self = this
 
-    return Stack.run(function (wrap) {
-      if (Stack.onhint) {
-        Stack.onhint(name, args)
-      }
+    var layer = Stack.descend()
+    if (Stack.onhint) {
+      Stack.onhint(name, args)
+    }
+
+    return layer.run(function (wrap) {
       args[0] = wrap(args[0])
       return real.apply(self, args)
     })

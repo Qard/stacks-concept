@@ -7,7 +7,6 @@ var jenga = win.Stack = require('../')
 //
 var stacks = {}
 var current = win.mainStack = {
-  id: jenga.top.id,
   children: {}
 }
 var newStack = current
@@ -21,7 +20,7 @@ jenga.oncreate = function (id) {
   current.children[id] = next
   stacks[id] = next
   newStack = next
-  console.log('created', next)
+  console.log('created', next.id)
 }
 
 jenga.onhint = function (name, args) {
@@ -31,10 +30,18 @@ jenga.onhint = function (name, args) {
 
 jenga.onchange = function (id, parentId) {
   current = stacks[id]
-  console.log('changed to', current, 'from', stacks[parentId])
+  console.log('changed to', id, 'from', parentId)
 }
 
 jenga.onexit = function () {
-  console.log('exited', current)
+  console.log('exited', current.id)
   current = current.parent
 }
+
+jenga.onresolve = function (id) {
+  console.log('resolved', id)
+}
+
+// Begin tracing the stack now
+jenga.init()
+current.id = jenga.top.id

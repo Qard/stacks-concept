@@ -9,10 +9,7 @@
   },
   "author": "Stephen Belanger <admin@stephenbelanger.com>",
   "license": "MIT",
-  "dependencies": {
-    "id-pool": "~0.1.0",
-    "sliced": "0.0.5"
-  },
+  "dependencies": {},
   "devDependencies": {
     "browserify": "~9.0.3",
     "serve": "~1.4.0"

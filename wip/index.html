@@ -20,6 +20,8 @@
         setTimeout(function () {
           items.forEach(console.log.bind(console, 'forEach inner'))
           items.forEach(console.log.bind(console, 'forEach inner'))
+          console.log(Stack.active)
+          console.log(Stack.stacks)
           console.log(Stack.ancestorIds(Stack.active.id))
           console.log('b')
         }, 1000)

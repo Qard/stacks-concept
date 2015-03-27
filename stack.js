@@ -11,7 +11,7 @@ var ids = new IdPool
 Stack.stacks = {}
 
 // Sugary simplification of descending from active stack
-Stack.run = function (fn) {
+Stack.descend = function (fn) {
   return Stack.active.descend(fn)
 }
 
@@ -42,6 +42,7 @@ function Stack (parentId, close) {
   this.parent = Stack.stacks[parentId]
   this.pendingCalls = 0
   this.close = close
+  Stack.stacks[this.id] = this
 
   if (Stack.oncreate) {
     Stack.oncreate(this.id)
@@ -51,12 +52,11 @@ function Stack (parentId, close) {
 // Descending stacks should hold their parent open until resolution
 Stack.prototype.descend = function (fn) {
   var s = new Stack(this.id, this.holdOpen())
-  return s.run(fn)
+  return fn ? s.run(fn) : s
 }
 
 // Enter this stack
 Stack.prototype.enter = function () {
-  Stack.stacks[this.id] = this
   Stack.active = this
 
   if (Stack.onenter) {
@@ -71,6 +71,7 @@ Stack.prototype.enter = function () {
 
 // Do cleanup when the stack is not longer in-use
 Stack.prototype.exit = function () {
+  this.exited = true
   if (Stack.onexit) {
     Stack.onexit(this.id)
   }
@@ -111,7 +112,7 @@ Stack.prototype.holdOpen = function () {
   var self = this
   return function () {
     self.pendingCalls--
-    if ( ! self.pendingCalls) {
+    if ( ! self.pendingCalls && self.exited) {
       self.release()
     }
   }
