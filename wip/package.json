@@ -5,6 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build": "browserify index.js -o bundle.js",
+    "watch:js": "watchify index.js -o bundle.js",
+    "watch": "npm run watch:js & npm start",
+    "dev": "npm run build && npm run start",
     "start": "serve"
   },
   "author": "Stephen Belanger <admin@stephenbelanger.com>",
@@ -12,6 +15,7 @@
   "dependencies": {},
   "devDependencies": {
     "browserify": "~9.0.3",
+    "watchify": "~2.4.0",
     "serve": "~1.4.0"
   }
 }

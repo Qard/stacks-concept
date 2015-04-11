@@ -20,11 +20,40 @@
         setTimeout(function () {
           items.forEach(console.log.bind(console, 'forEach inner'))
           items.forEach(console.log.bind(console, 'forEach inner'))
-          console.log(Stack.active)
+          var active = Stack.getActiveStackFrame()
+          console.log(active)
           console.log(Stack.stacks)
-          console.log(Stack.ancestorIds(Stack.active.id))
+          console.log(Stack.ancestorIds(active.id))
           console.log('b')
         }, 1000)
+      })
+
+      var el = document.createElement('div')
+      document.body.appendChild(el)
+      el.innerHTML = 'Hello, world'
+
+      el.addEventListener('click', function () {
+        var req = new XMLHttpRequest()
+        req.url = document.location
+
+        function handle (type) {
+          return function () {
+            console.log(type, 'returned', arguments)
+          }
+        }
+
+        req.addEventListener('load', handle('onload'))
+
+        req.onreadystatechange = handle('onreadystatechange')
+        req.onprogress = handle('onprogress')
+        req.ontimeout = handle('ontimeout')
+        req.onerror = handle('onerror')
+        req.open('GET', req.url, true)
+        req.send('')
+      })
+
+      document.addEventListener('click', function () {
+        console.log('in document listener')
       })
     </script>
   </body>
