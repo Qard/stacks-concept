@@ -4,56 +4,46 @@
     <title>Test</title>
   </head>
   <body>
+    <h1>Hello, world!</h1>
     <script type="text/javascript" src="/bundle.js"></script>
     <script type="text/javascript">
-      var items = [1,2]
-
-      items.forEach(function (v) {
-        requestAnimationFrame(function () {
-          setTimeout(function () {
-            console.log('a')
-          }, v * 1000)
-        })
-      })
-
-      requestAnimationFrame(function () {
-        setTimeout(function () {
-          items.forEach(console.log.bind(console, 'forEach inner'))
-          items.forEach(console.log.bind(console, 'forEach inner'))
-          var active = Stack.getActiveStackFrame()
-          console.log(active)
-          console.log(Stack.stacks)
-          console.log(Stack.ancestorIds(active.id))
-          console.log('b')
-        }, 1000)
-      })
-
       var el = document.createElement('div')
       document.body.appendChild(el)
-      el.innerHTML = 'Hello, world'
+      el.innerHTML = 'sup'
 
-      el.addEventListener('click', function () {
-        var req = new XMLHttpRequest()
-        req.url = document.location
+      // el.addEventListener('click', function () {
+      //   var req = new XMLHttpRequest()
+      //   req.url = document.location + '?foo=' + Math.random()
+      //
+      //   function handle (type) {
+      //     return function () {
+      //       console.log(type, 'returned', arguments)
+      //     }
+      //   }
+      //
+      //   req.addEventListener('load', function () {
+      //     console.log('ready state changed to', xhr.readyState)
+      //   })
+      //
+      //
+      //   req.addEventListener('progress', handle('progress'), false)
+      //   req.addEventListener('error', handle('error'), false)
+      //   req.addEventListener('abort', handle('abort'), false)
+      //
+      //   // req.onprogress = handle('onprogress')
+      //   // req.ontimeout = handle('ontimeout')
+      //   // req.onerror = handle('onerror')
+      //
+      //   req.open('GET', req.url, true)
+      //   req.send()
+      // })
 
-        function handle (type) {
-          return function () {
-            console.log(type, 'returned', arguments)
-          }
-        }
-
-        req.addEventListener('load', handle('onload'))
-
-        req.onreadystatechange = handle('onreadystatechange')
-        req.onprogress = handle('onprogress')
-        req.ontimeout = handle('ontimeout')
-        req.onerror = handle('onerror')
-        req.open('GET', req.url, true)
-        req.send('')
-      })
-
-      document.addEventListener('click', function () {
-        console.log('in document listener')
+      var h1 = document.querySelector('h1')
+      h1.addEventListener('click', function () {
+        var t = setInterval(function () {}, 25)
+        setTimeout(function () {
+          clearInterval(t)
+        }, 100)
       })
     </script>
   </body>
