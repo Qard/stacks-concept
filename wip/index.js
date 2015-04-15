@@ -23,17 +23,20 @@ jenga.oncreate = function (id) {
   // console.log('created', next.id)
 }
 
-jenga.onhint = function (name, args, context) {
+jenga.oncreatehint = function (name, args, context) {
   newStack.name = name || '(anonymous)'
   newStack.arguments = args
   newStack.context = context
-  console.log('create', newStack)
+  var cls = context.constructor.name
+  console.log('create ' + cls + '.' + newStack.name, newStack)
 }
 
 jenga.onenterhint = function (args, context) {
   current.exitArguments = args
   current.exitContext = context
-  console.log('enter', newStack)
+
+  var cls = current.context.constructor.name
+  console.log('enter ' + cls + '.' + current.name, current)
 }
 
 jenga.onchange = function (id, parentId) {
@@ -42,12 +45,17 @@ jenga.onchange = function (id, parentId) {
 }
 
 jenga.onexit = function () {
-  console.log('exit', current)
+  var cls = current.context.constructor.name
+  console.log('exit ' + cls + '.' + current.name, current)
   current = current.parent
 }
 
 jenga.onresolve = function (id) {
-  console.log('resolve', stacks[id])
+  var stack = stacks[id]
+  if (stack.context) {
+    var cls = stack.context.constructor.name
+    console.log('resolve ' + cls + '.' + stack.name, stack)
+  }
 }
 
 // Begin tracing the stack now
