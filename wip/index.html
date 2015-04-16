@@ -11,32 +11,35 @@
       document.body.appendChild(el)
       el.innerHTML = 'sup'
 
-      // el.addEventListener('click', function () {
-      //   var req = new XMLHttpRequest()
-      //   req.url = document.location + '?foo=' + Math.random()
-      //
-      //   function handle (type) {
-      //     return function () {
-      //       console.log(type, 'returned', arguments)
-      //     }
-      //   }
-      //
-      //   req.addEventListener('load', function () {
-      //     console.log('ready state changed to', xhr.readyState)
-      //   })
-      //
-      //
-      //   req.addEventListener('progress', handle('progress'), false)
-      //   req.addEventListener('error', handle('error'), false)
-      //   req.addEventListener('abort', handle('abort'), false)
-      //
-      //   // req.onprogress = handle('onprogress')
-      //   // req.ontimeout = handle('ontimeout')
-      //   // req.onerror = handle('onerror')
-      //
-      //   req.open('GET', req.url, true)
-      //   req.send()
-      // })
+      el.addEventListener('click', function () {
+        var req = new XMLHttpRequest()
+        req.url = document.location + '?foo=' + Math.random()
+
+        function handle (type) {
+          return function () {
+            console.log(type, 'called with', arguments)
+          }
+        }
+
+        req.addEventListener('load', function () {
+          console.log('ready state changed to', req.readyState)
+        })
+
+
+        // req.addEventListener('progress', handle('progress'), false)
+        // req.addEventListener('error', handle('error'), false)
+        // req.addEventListener('abort', handle('abort'), false)
+
+        req.onprogress = handle('onloadstart')
+        req.onprogress = handle('onloadend')
+        req.onprogress = handle('onprogress')
+        req.ontimeout = handle('ontimeout')
+        req.onerror = handle('onabort')
+        req.onerror = handle('onerror')
+
+        req.open('GET', req.url, true)
+        req.send()
+      })
 
       var h1 = document.querySelector('h1')
       h1.addEventListener('click', function () {

@@ -35,8 +35,11 @@ jenga.onenterhint = function (args, context) {
   current.exitArguments = args
   current.exitContext = context
 
-  var cls = current.context.constructor.name
-  console.log('enter ' + cls + '.' + current.name, current)
+  var ctx = current.context
+  if (ctx) {
+    var cls = ctx.constructor.name
+    console.log('enter ' + cls + '.' + current.name, current)
+  }
 }
 
 jenga.onchange = function (id, parentId) {
@@ -45,8 +48,11 @@ jenga.onchange = function (id, parentId) {
 }
 
 jenga.onexit = function () {
-  var cls = current.context.constructor.name
-  console.log('exit ' + cls + '.' + current.name, current)
+  var ctx = current.context
+  if (ctx) {
+    var cls = ctx.constructor.name
+    console.log('exit ' + cls + '.' + current.name, current)
+  }
   current = current.parent
 }
 
