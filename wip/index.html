@@ -21,20 +21,26 @@
           }
         }
 
-        req.addEventListener('load', function () {
-          console.log('ready state changed to', req.readyState)
-        })
+        // req.addEventListener('load', function () {
+        //   console.log('ready state changed to', req.readyState)
+        // })
 
+        req.addEventListener('onreadystatechange', handle('onreadystatechange'), false)
+        req.addEventListener('load', handle('load'), false)
+        req.addEventListener('loadstart', handle('loadstart'), false)
+        req.addEventListener('loadend', handle('loadend'), false)
+        req.addEventListener('progress', handle('progress'), false)
+        req.addEventListener('timeout', handle('timeout'), false)
+        req.addEventListener('abort', handle('abort'), false)
+        req.addEventListener('error', handle('error'), false)
 
-        // req.addEventListener('progress', handle('progress'), false)
-        // req.addEventListener('error', handle('error'), false)
-        // req.addEventListener('abort', handle('abort'), false)
-
-        req.onprogress = handle('onloadstart')
-        req.onprogress = handle('onloadend')
+        req.onreadystatechange = handle('onreadystatechange')
+        req.onload = handle('onload')
+        req.onloadstart = handle('onloadstart')
+        req.onloadend = handle('onloadend')
         req.onprogress = handle('onprogress')
         req.ontimeout = handle('ontimeout')
-        req.onerror = handle('onabort')
+        req.onabort = handle('onabort')
         req.onerror = handle('onerror')
 
         req.open('GET', req.url, true)
