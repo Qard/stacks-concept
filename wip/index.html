@@ -21,11 +21,7 @@
           }
         }
 
-        // req.addEventListener('load', function () {
-        //   console.log('ready state changed to', req.readyState)
-        // })
-
-        req.addEventListener('onreadystatechange', handle('onreadystatechange'), false)
+        req.addEventListener('readystatechange', handle('readystatechange'), false)
         req.addEventListener('load', handle('load'), false)
         req.addEventListener('loadstart', handle('loadstart'), false)
         req.addEventListener('loadend', handle('loadend'), false)
