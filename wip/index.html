@@ -48,6 +48,7 @@
         var t = setInterval(function () {}, 25)
         setTimeout(function () {
           clearInterval(t)
+          el.innerHTML = Date.now().toString()
         }, 100)
       })
     </script>
