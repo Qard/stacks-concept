@@ -1,6 +1,9 @@
 var win = typeof window !== 'undefined' ? window : global
 
 var jenga = win.Stack = require('../')
+var pinghome = require('ping-home')
+var slice = require('sliced')
+var selector = require('unique-selector')
 
 //
 // Build stack tree for debugging
@@ -10,6 +13,38 @@ var current = win.mainStack = {
   children: {}
 }
 var newStack = current
+
+Object.defineProperty(Function.prototype, 'signature', {
+  get: function () {
+    return this.toString().match(/function[^\(]*\([^\)]*\)/).shift() + ' {}'
+  }
+})
+
+function jsonWithFns (data) {
+  return JSON.stringify(data, function (_, v) {
+    return typeof v === 'function' ? v.signature : v
+  })
+}
+
+function serializeArguments (args) {
+  try { return jsonWithFns(slice(args)) }
+  catch (e) { return '(unknown)' }
+}
+
+function serializeContext (ctx) {
+  if (ctx instanceof Element) {
+    return selector(ctx)
+  }
+  if (ctx.constructor.name === 'Object') {
+    return jsonWithFns(ctx)
+  }
+  return ctx.constructor.name
+}
+
+function report (type, data) {
+  data.ts = Date.now()
+  pinghome('/report/' + type, data)
+}
 
 jenga.oncreate = function (id) {
   var next = {
@@ -28,18 +63,31 @@ jenga.oncreatehint = function (name, args, context) {
   newStack.arguments = args
   newStack.context = context
   var cls = context.constructor.name
-  console.log('create ' + cls + '.' + newStack.name, newStack)
+
+  report('create', {
+    id: newStack.id,
+    name: cls + '.' + newStack.name,
+    arguments: serializeArguments(args),
+    context: serializeContext(context),
+    parent: newStack.parent.id,
+  })
+  // console.log('create ' + cls + '.' + newStack.name, newStack)
 }
 
 jenga.onenterhint = function (args, context) {
   current.exitArguments = args
   current.exitContext = context
+  report('enter', {
+    id: current.id,
+    exitArguments: serializeArguments(args),
+    exitContext: serializeContext(context),
+  })
 
-  var ctx = current.context
-  if (ctx) {
-    var cls = ctx.constructor.name
-    console.log('enter ' + cls + '.' + current.name, current)
-  }
+  // var ctx = current.context
+  // if (ctx) {
+  //   var cls = ctx.constructor.name
+  //   console.log('enter ' + cls + '.' + current.name, current)
+  // }
 }
 
 jenga.onchange = function (id, parentId) {
@@ -48,20 +96,26 @@ jenga.onchange = function (id, parentId) {
 }
 
 jenga.onexit = function () {
-  var ctx = current.context
-  if (ctx) {
-    var cls = ctx.constructor.name
-    console.log('exit ' + cls + '.' + current.name, current)
-  }
+  // var ctx = current.context
+  // if (ctx) {
+  //   var cls = ctx.constructor.name
+  //   console.log('exit ' + cls + '.' + current.name, current)
+  // }
+  report('exit', {
+    id: current.id
+  })
   current = current.parent
 }
 
 jenga.onresolve = function (id) {
   var stack = stacks[id]
-  if (stack.context) {
-    var cls = stack.context.constructor.name
-    console.log('resolve ' + cls + '.' + stack.name, stack)
-  }
+  report('resolve', {
+    id: id
+  })
+  // if (stack.context) {
+  //   var cls = stack.context.constructor.name
+  //   console.log('resolve ' + cls + '.' + stack.name, stack)
+  // }
 }
 
 // Begin tracing the stack now

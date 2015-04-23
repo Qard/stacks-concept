@@ -1,20 +1,33 @@
-require('./index')
+var fs = require('fs')
+var express = require('express')
+var bodyParser = require('body-parser')
+var serveStatic = require('serve-static')
+var multer  = require('multer')
 
-var items = [1,2]
+var app = express()
 
-items.forEach(function (v) {
-  setImmediate(function () {
-    setTimeout(function () {
-      console.log('a')
-    }, v * 1000)
-  })
+app.use(multer({
+	dest: './uploads/'
+}))
+
+app.use(serveStatic('.', {
+	index: [
+		'index.html',
+		'index.htm'
+	]
+}))
+
+// Parse POST bodies
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({
+	extended: false
+}))
+
+app.post('/report/:type', function (req, res) {
+	console.log('received', req.params.type, req.body)
+	res.end('OK')
 })
 
-setImmediate(function () {
-  setTimeout(function () {
-    items.forEach(console.log.bind(console, 'forEach inner'))
-    items.forEach(console.log.bind(console, 'forEach inner'))
-    console.log(Stack.ancestorIds(Stack.active.id))
-    console.log('b')
-  }, 1000)
+var server = app.listen(3000, function () {
+	console.log('Listening at http://localhost:' + server.address().port)
 })

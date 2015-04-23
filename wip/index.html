@@ -4,11 +4,12 @@
     <title>Test</title>
   </head>
   <body>
-    <h1>Hello, world!</h1>
+    <h1 id="hello">Hello, world!</h1>
     <script type="text/javascript" src="/bundle.js"></script>
     <script type="text/javascript">
       var el = document.createElement('div')
       document.body.appendChild(el)
+      el.className = 'content'
       el.innerHTML = 'sup'
 
       el.addEventListener('click', function () {
