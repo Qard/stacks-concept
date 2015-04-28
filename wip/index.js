@@ -10,119 +10,121 @@ var inputEventName = require('input-event-name')
 // Build stack tree for debugging
 //
 var stacks = {}
-var current = win.mainStack = {
-  children: {}
-}
-var newStack = current
+var current
+var next
 
+// At create time, store the id and make a stack map reference to the parent
+jenga.oncreate = function (id) {
+  stacks[id] = current
+  next = id
+}
+
+// When the creation hint is received, report layer with context data
+jenga.oncreatehint = function (name, args, context) {
+  var cls = context.constructor.name
+  var data = {
+    id: next,
+    name: cls + '.' + (name || '(anonymous)'),
+    parent: stacks[next],
+  }
+
+  parseArgs(data, args)
+  parseContext(data, context)
+
+  report('create', data)
+}
+
+// Track stack id changes
+jenga.onchange = function (id, parentId) {
+  current = id
+}
+
+// When the enter hint is received, report more context data
+jenga.onenterhint = function (args, context) {
+  var data = {
+    id: current
+  }
+
+  parseArgs(data, args, 'exitArguments')
+  parseContext(data, context, 'exitContext')
+
+  report('enter', data)
+}
+
+// Report layer exits and track stack id change back up
+jenga.onexit = function (id) {
+  current = stacks[id]
+  report('exit', {
+    id: id
+  })
+}
+
+// Report layer resolution and clear stack map reference
+jenga.onresolve = function (id) {
+  delete stacks[id]
+  report('resolve', {
+    id: id
+  })
+}
+
+// Begin tracing the stack now
+jenga.init()
+current = jenga.top.id
+
+//
+// Helpers
+//
+
+// Helper to get the signature string of any given function
 Object.defineProperty(Function.prototype, 'signature', {
   get: function () {
     return this.toString().match(/function[^\(]*\([^\)]*\)/).shift() + ' {}'
   }
 })
 
-function jsonWithFns (data) {
+// Serialize JSON with function signatures included
+function serialize (data) {
   return JSON.stringify(data, function (_, v) {
     return typeof v === 'function' ? v.signature : v
   })
 }
 
+// Serialize arguments
+// TODO: Extract data from this and apply directly to reported object?
+// SEE: Spec concept documentation
 function serializeArguments (args) {
   var ret = slice(args || []).map(function (arg) {
     return inputEventName.any(arg) || arg
   })
-  console.log('ret is', ret)
-  try { return jsonWithFns(ret) }
+  try { return serialize(ret) }
   catch (e) { return '(unknown)' }
 }
 
+// Attempt to serialize context object to something that can be reported
+// TODO: Extract data from this and apply directly to reported object?
+// SEE: Spec concept documentation
 function serializeContext (ctx) {
   if (ctx instanceof Element) {
     return selector(ctx)
   }
   if (ctx.constructor.name === 'Object') {
-    return jsonWithFns(ctx)
+    try { return serialize(ctx) } catch (e) {}
   }
   return ctx.constructor.name
 }
 
+function parseArgs (data, args, key) {
+  key = key || 'arguments'
+  data[key] = serializeArguments(args)
+}
+function parseContext (data, context, key) {
+  key = key || 'context'
+  data[key] = serializeContext(context)
+}
+
+// Report an event
 function report (type, data) {
   data.ts = Date.now()
   pinghome('/report/' + type, data)
+  console.log('reported', type, data)
 }
-
-jenga.oncreate = function (id) {
-  var next = {
-    id: id,
-    parent: current,
-    children: {}
-  }
-  current.children[id] = next
-  stacks[id] = next
-  newStack = next
-  // console.log('created', next.id)
-}
-
-jenga.oncreatehint = function (name, args, context) {
-  newStack.name = name || '(anonymous)'
-  newStack.arguments = args
-  newStack.context = context
-  var cls = context.constructor.name
-
-  report('create', {
-    id: newStack.id,
-    name: cls + '.' + newStack.name,
-    arguments: serializeArguments(args),
-    context: serializeContext(context),
-    parent: newStack.parent.id,
-  })
-  // console.log('create ' + cls + '.' + newStack.name, newStack)
-}
-
-jenga.onenterhint = function (args, context) {
-  current.exitArguments = args
-  current.exitContext = context
-  report('enter', {
-    id: current.id,
-    exitArguments: serializeArguments(args),
-    exitContext: serializeContext(context),
-  })
-
-  // var ctx = current.context
-  // if (ctx) {
-  //   var cls = ctx.constructor.name
-  //   console.log('enter ' + cls + '.' + current.name, current)
-  // }
-}
-
-jenga.onchange = function (id, parentId) {
-  current = stacks[id]
-  // console.log('changed to', id, 'from', parentId)
-}
-
-jenga.onexit = function () {
-  // var ctx = current.context
-  // if (ctx) {
-  //   var cls = ctx.constructor.name
-  //   console.log('exit ' + cls + '.' + current.name, current)
-  // }
-  report('exit', {
-    id: current.id
-  })
-  current = current.parent
-}
-
-jenga.onresolve = function (id) {
-  var stack = stacks[id]
-  report('resolve', {
-    id: id
-  })
-  // if (stack.context) {
-  //   var cls = stack.context.constructor.name
-  //   console.log('resolve ' + cls + '.' + stack.name, stack)
-  // }
-}
-
-// Begin tracing the stack now
-jenga.init()
-current.id = jenga.top.id
