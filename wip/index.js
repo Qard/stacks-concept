@@ -4,6 +4,7 @@ var jenga = win.Stack = require('../')
 var pinghome = require('ping-home')
 var slice = require('sliced')
 var selector = require('unique-selector')
+var inputEventName = require('input-event-name')
 
 //
 // Build stack tree for debugging
@@ -27,7 +28,11 @@ function jsonWithFns (data) {
 }
 
 function serializeArguments (args) {
-  try { return jsonWithFns(slice(args)) }
+  var ret = slice(args || []).map(function (arg) {
+    return inputEventName.any(arg) || arg
+  })
+  console.log('ret is', ret)
+  try { return jsonWithFns(ret) }
   catch (e) { return '(unknown)' }
 }
 
