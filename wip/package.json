@@ -4,10 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "browserify index.js -o bundle.js",
-    "watch:js": "watchify index.js -o bundle.js",
-    "watch": "npm run watch:js & npm start",
-    "dev": "npm run build && npm run start",
+    "build": "gulp build",
+    "watch": "gulp watch",
     "start": "node server"
   },
   "author": "Stephen Belanger <admin@stephenbelanger.com>",
@@ -23,8 +21,12 @@
     "unique-selector": "0.0.4"
   },
   "devDependencies": {
-    "browserify": "~9.0.3",
-    "watchify": "~2.4.0",
-    "serve": "~1.4.0"
+  	"babelify": "~6.0.2",
+  	"browserify": "~9.0.3",
+  	"gulp": "~3.8.11",
+  	"gulp-develop-server": "~0.4.2",
+  	"serve": "~1.4.0",
+  	"vinyl-source-stream": "~1.1.0",
+  	"watchify": "~2.4.0"
   }
 }

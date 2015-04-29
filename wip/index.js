@@ -1,26 +1,27 @@
-var win = typeof window !== 'undefined' ? window : global
+import selector from 'unique-selector'
+import {any} from 'input-event-name'
+import pinghome from 'ping-home'
+import slice from 'sliced'
+import Stack from '../'
 
-var jenga = win.Stack = require('../')
-var pinghome = require('ping-home')
-var slice = require('sliced')
-var selector = require('unique-selector')
-var inputEventName = require('input-event-name')
+// TODO: Just exposing this for debugging. Remove this later.
+window.Stack = Stack
 
 //
 // Build stack tree for debugging
 //
-var stacks = {}
-var current
-var next
+let stacks = {}
+let current
+let next
 
 // At create time, store the id and make a stack map reference to the parent
-jenga.oncreate = function (id) {
+Stack.oncreate = function (id) {
   stacks[id] = current
   next = id
 }
 
 // When the creation hint is received, report layer with context data
-jenga.oncreatehint = function (name, args, context) {
+Stack.oncreatehint = function (name, args, context) {
   var cls = context.constructor.name
   var data = {
     id: next,
@@ -35,12 +36,12 @@ jenga.oncreatehint = function (name, args, context) {
 }
 
 // Track stack id changes
-jenga.onchange = function (id, parentId) {
+Stack.onchange = function (id, parentId) {
   current = id
 }
 
 // When the enter hint is received, report more context data
-jenga.onenterhint = function (args, context) {
+Stack.onenterhint = function (args, context) {
   var data = {
     id: current
   }
@@ -52,24 +53,20 @@ jenga.onenterhint = function (args, context) {
 }
 
 // Report layer exits and track stack id change back up
-jenga.onexit = function (id) {
+Stack.onexit = function (id) {
   current = stacks[id]
-  report('exit', {
-    id: id
-  })
+  report('exit', { id })
 }
 
 // Report layer resolution and clear stack map reference
-jenga.onresolve = function (id) {
+Stack.onresolve = function (id) {
   delete stacks[id]
-  report('resolve', {
-    id: id
-  })
+  report('resolve', { id })
 }
 
 // Begin tracing the stack now
-jenga.init()
-current = jenga.top.id
+Stack.init()
+current = Stack.top.id
 
 //
 // Helpers
@@ -77,25 +74,26 @@ current = jenga.top.id
 
 // Helper to get the signature string of any given function
 Object.defineProperty(Function.prototype, 'signature', {
-  get: function () {
+  get() {
     return this.toString().match(/function[^\(]*\([^\)]*\)/).shift() + ' {}'
   }
 })
 
+// Just did this to make the typeof check shorter...
+function isFn (fn) {
+  return typeof fn === 'function'
+}
+
 // Serialize JSON with function signatures included
 function serialize (data) {
-  return JSON.stringify(data, function (_, v) {
-    return typeof v === 'function' ? v.signature : v
-  })
+  return JSON.stringify(data, (_, v) => isFn(v) ? v.signature : v)
 }
 
 // Serialize arguments
 // TODO: Extract data from this and apply directly to reported object?
 // SEE: Spec concept documentation
 function serializeArguments (args) {
-  var ret = slice(args || []).map(function (arg) {
-    return inputEventName.any(arg) || arg
-  })
+  let ret = slice(args || []).map((arg) => any(arg) || arg)
   try { return serialize(ret) }
   catch (e) { return '(unknown)' }
 }
