@@ -11,22 +11,22 @@
   "author": "Stephen Belanger <admin@stephenbelanger.com>",
   "license": "MIT",
   "dependencies": {
-    "body-parser": "~1.12.3",
-    "express": "~4.12.3",
+    "body-parser": "~1.18.3",
+    "express": "~4.16.4",
     "input-event-name": "~1.0.3",
-    "multer": "~0.1.8",
+    "multer": "~1.4.1",
     "ping-home": "~0.1.0",
-    "serve-static": "~1.9.2",
-    "sliced": "0.0.5",
-    "unique-selector": "0.0.4"
+    "serve-static": "~1.13.2",
+    "sliced": "1.0.1",
+    "unique-selector": "0.4.1"
   },
   "devDependencies": {
-  	"babelify": "~6.0.2",
-  	"browserify": "~9.0.3",
-  	"gulp": "~3.8.11",
-  	"gulp-develop-server": "~0.4.2",
-  	"serve": "~1.4.0",
-  	"vinyl-source-stream": "~1.1.0",
-  	"watchify": "~2.4.0"
+  	"babelify": "~10.0.0",
+  	"browserify": "~16.2.3",
+  	"gulp": "~4.0.0",
+  	"gulp-develop-server": "~0.5.2",
+  	"serve": "~10.1.2",
+  	"vinyl-source-stream": "~2.0.0",
+  	"watchify": "~3.11.0"
   }
 }
