@@ -12,7 +12,7 @@
   "license": "MIT",
   "dependencies": {
     "body-parser": "~1.12.3",
-    "express": "~4.12.3",
+    "express": "~4.19.2",
     "input-event-name": "~1.0.3",
     "multer": "~0.1.8",
     "ping-home": "~0.1.0",
