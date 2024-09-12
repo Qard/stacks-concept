@@ -11,12 +11,12 @@
   "author": "Stephen Belanger <admin@stephenbelanger.com>",
   "license": "MIT",
   "dependencies": {
-    "body-parser": "~1.12.3",
-    "express": "~4.12.3",
+    "body-parser": "~1.20.3",
+    "express": "~4.21.0",
     "input-event-name": "~1.0.3",
     "multer": "~0.1.8",
     "ping-home": "~0.1.0",
-    "serve-static": "~1.9.2",
+    "serve-static": "~1.16.1",
     "sliced": "0.0.5",
     "unique-selector": "0.0.4"
   },
